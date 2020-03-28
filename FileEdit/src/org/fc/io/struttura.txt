@@ -1,0 +1,27 @@
+Struttura del package di io
+===========================
+
+Files
+
+	(A) DataFile
+		+--- (A) XVsamFile
+		|		+--- KsdsFile
+		|		+--- EsdsFile
+		|		+--- RrdsFile
+		|
+		+--- FlatFile
+
+Records
+	(A) Record
+		+--- KsdsRecord
+		+--- EsdsRecord
+		+--- RrrsRecord
+		+--- FlatRecord
+
+Chiavi
+	(A) RecordKey
+		+--- KsdsKey
+		+--- EsdsKey
+		+--- RrrsKey
+		+--- FlatKey
+		
