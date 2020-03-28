@@ -1,2 +1,2 @@
-# fileedit
+# FileEdit
 Sequential File Editor
