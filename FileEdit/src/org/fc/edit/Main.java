@@ -4,30 +4,23 @@
 
 package org.fc.edit;
 
-import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-
-import org.fc.widgets.DynaConstants;
-import org.fc.widgets.DynaDialog;
-import org.fc.widgets.DynaGridBagPanel;
-import org.fc.widgets.DynaPanel;
-import org.fc.widgets.SmartDialog;
+import org.fc.edit.swing.FileEdit;
 
 import javafx.application.Application;
-import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
@@ -44,6 +37,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -71,7 +65,7 @@ public class Main extends Application {
 	public final static String CMD_SEARCH_FIND = "search.find";
 	public final static String CMD_SEARCH_PGUP = "search.find.page.up";
 	public final static String CMD_SEARCH_PGDW = "search.find.page.down";
-	public final static String CMD_SEARCH_FIND_NEXT = "search.find.next"; 
+	public final static String CMD_SEARCH_FIND_NEXT = "search.find.next";
 	public final static String CMD_SEARCH_FIND_PREV = "search.find.prev";
 	public final static String CMD_SEARCH_REPLACE = "search.replace";
 	public final static String CMD_SEARCH_TOP = "search.top";
@@ -137,49 +131,83 @@ public class Main extends Application {
 	ResourceBundle messages = null;
 	Logger logger = Logger.getLogger(this.getClass().getName());
 
-	FileEditorPane fe=null;
-	
+	FileEditorPane fe = null;
+	Stage primaryStage;
+
 	@Override
 	public void start(Stage stage) throws Exception {
 		// StackPane root = new StackPane();
 		// //FXMLLoader.load(getClass().getResource("scene.fxml"));
 		// ObservableList list = root.getChildren();
+		OpenFileCommand ofc = null;
+
+		List<String> l = getParameters().getRaw();
+		if (!l.isEmpty()) {
+			ofc = handleCommandLine(l.toArray(new String[0]));
+		}
 
 		messages = ResourceBundle.getBundle("org.fc.edit.messages");
 
+		primaryStage = stage;
 		Pane root = initWidgets();
-
-		// root.getChildren().add(new Label("RAVA"));
-
 		Scene scene = new Scene(root, 800, 600);
-		// scene.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
-		/*
-		 * Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); Dimension
-		 * frameSize = new Dimension((long)scene.getWidth(), (long)scene.getHeight());
-		 * if (frameSize.height > screenSize.height) { frameSize.height =
-		 * screenSize.height; } if (frameSize.width > screenSize.width) {
-		 * frameSize.width = screenSize.width; } int posx = (screenSize.width -
-		 * frameSize.width) / 2; int posy = (screenSize.height - frameSize.height) / 2;
-		 * this.setLocation(posx, posy);
-		 */
-
 		setMenuState();
-		// this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		stage.setTitle("FileEdit " + PackageInfo.getVersion());
 		stage.setScene(scene);
+
 		
-		stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-		    @Override
-		    public void handle(WindowEvent t) {
-		    	doExit();
-		    }
-		});
+		
 		stage.show();
+
+		if (ofc != null) {
+			open(new File(ofc.filename), ofc.reclen, ofc.readonly, ofc.varlen, ofc.littleEndian);
+		}
 	}
 
-	public static void main(String[] args) {
-		// TODO: command line arguments
-		launch(args);
+	OpenFileCommand handleCommandLine(String[] argv) {
+		if (argv.length > 0) {
+			int len = 80;
+			String file = null;
+			String catalog = null;
+			boolean ro = false;
+			OPTS: for (int i = 0; i < argv.length; i++) {
+				if (argv[i].startsWith("-")) {
+					if (argv[i].equals("-help")) {
+						showUsage();
+					}
+					if (argv[i].equals("-version")) {
+						showVersion();
+					}
+					if (argv[i].equals("-length")) {
+						len = Integer.parseInt(argv[++i]);
+						continue OPTS;
+					}
+					if (argv[i].equals("-ro")) {
+						ro = true;
+						continue OPTS;
+					}
+
+					continue OPTS;
+				}
+				if (file == null) {
+					file = argv[i];
+					continue OPTS;
+				}
+				if (catalog == null) {
+					catalog = argv[i];
+					continue OPTS;
+				}
+			}
+			if (file == null) {
+				FileEdit.wrongParms("missing file name");
+			}
+			return new OpenFileCommand(file, len, ro, false, false);
+		}
+		return null;
+	}
+
+	public static void main(String[] argv) {
+		launch(argv);
 	}
 
 	private Pane initWidgets() {
@@ -262,8 +290,8 @@ public class Main extends Application {
 		menuBar.getMenus().add(mHelp);
 
 		logger.severe("MANCA IL PANNELLO FILEPANE");
-		fe=new FileEditorPane(this, messages);
-		BorderPane bp=new BorderPane();
+		fe = new FileEditorPane(this, messages);
+		BorderPane bp = new BorderPane();
 		bp.setTop(new VBox(menuBar, toolBar));
 		bp.setCenter(fe);
 		return bp;
@@ -277,19 +305,19 @@ public class Main extends Application {
 
 	MenuItem addMenuItem(Menu m, String cmd) {
 		MenuItem mi = new MenuItem(messages.getString("menu." + cmd));
-		//String res = "graphics/" + cmd + ".png";
-		//mi.setGraphic(new ImageView(new Image(getClass().getResourceAsStream(res))));
+		// String res = "graphics/" + cmd + ".png";
+		// mi.setGraphic(new ImageView(new Image(getClass().getResourceAsStream(res))));
 		mi.setOnAction(value -> {
 			actionPerformed(cmd);
 		});
 		m.getItems().add(mi);
 		return mi;
 	}
- 
+
 	RadioMenuItem addRadioButtonMenu(Menu m, ToggleGroup group, String cmd) {
 		RadioMenuItem mi = new RadioMenuItem(messages.getString("menu." + cmd));
-		//String res = "graphics/" + cmd + ".png";
-		//mi.setGraphic(new ImageView(new Image(getClass().getResourceAsStream(res))));
+		// String res = "graphics/" + cmd + ".png";
+		// mi.setGraphic(new ImageView(new Image(getClass().getResourceAsStream(res))));
 		mi.setOnAction(value -> {
 			actionPerformed(cmd);
 		});
@@ -299,11 +327,11 @@ public class Main extends Application {
 	}
 
 	private Button addToolbarButton(ToolBar t, String cmd) {
-		return (Button)addTollbarAbstractButton(t, cmd, new Button());
+		return (Button) addTollbarAbstractButton(t, cmd, new Button());
 	}
 
 	private ToggleButton addToolbarToggleButton(ToolBar t, String cmd) {
-		return (ToggleButton)addTollbarAbstractButton(t, cmd, new ToggleButton());
+		return (ToggleButton) addTollbarAbstractButton(t, cmd, new ToggleButton());
 	}
 
 	private ButtonBase addTollbarAbstractButton(ToolBar t, String cmd, ButtonBase b) {
@@ -331,7 +359,7 @@ public class Main extends Application {
 		boolean fileClose = true;
 		boolean noSelection = true;
 		boolean flat = false;
-		
+
 		if (fe != null) {
 			fileClose = !fe.isOpened();
 			noSelection = !fe.hasSelection();
@@ -344,7 +372,7 @@ public class Main extends Application {
 		miExit.setDisable(false);
 
 		mSearch.setDisable(fileClose);
-		//miSearchTop.setEnabled(file);
+		// miSearchTop.setEnabled(file);
 		// miSearchBottom.setEnabled(b);
 
 		mEdit.setDisable(fileClose);
@@ -358,7 +386,7 @@ public class Main extends Application {
 		btnFileSave.setDisable(fileClose);
 		btnFileSaveAs.setDisable(fileClose);
 
-		btnEditCut.setDisable(fileClose ||noSelection);
+		btnEditCut.setDisable(fileClose || noSelection);
 		btnEditCopy.setDisable(fileClose || noSelection);
 		btnEditPaste.setDisable(fileClose);
 		btnSearchFind.setDisable(fileClose);
@@ -391,58 +419,23 @@ public class Main extends Application {
 		System.err.println("  -help         show this help");
 		System.exit(0);
 	}
-	
+
 	public static void showVersion() {
 		System.err.println("Jedi version " + PackageInfo.getVersion());
 		System.exit(0);
 	}
-	
+
 	public void doOpen(boolean flat) {
 		if (!doClose()) {
 			return;
 		}
-		//TODO: open file dialog
-		/**
-		if (flat) {
-			DynaGridBagPanel dp;
-			if (chooser == null) {
-				chooser = new JFileChooser();
-				dp = new DynaGridBagPanel(this, "");
-				dp.addField("RECLEN", messages.getString("labels.record.length"), DynaDialog.INTEGER, null, true);
-				dp.addField("READONLY", messages.getString("labels.read.only"), DynaDialog.BOOLEAN, null);
-				dp.addField("VARLEN", messages.getString("labels.variable.length"), DynaDialog.BOOLEAN, null);
-				dp.addField("VARLENLE", messages.getString("labels.variable.length.le"), DynaDialog.BOOLEAN, null);
-				dp.setPanelBorder(DynaPanel.BORDER_NONE);
-				dp.pack();
-				chooser.setAccessory(dp);
-			} else {
-				dp = (DynaGridBagPanel) chooser.getAccessory();
-			}
-			for (;;) {
-				int returnVal = chooser.showOpenDialog(parent);
-				if (returnVal != JFileChooser.APPROVE_OPTION) {
-					return;
-				}
-				if (dp.verifyData()) {
-					if (returnVal == JFileChooser.APPROVE_OPTION) {
-						doClose();
-						Integer reclen = (Integer) dp.getValue("RECLEN");
-						Boolean ro = (Boolean) dp.getValue("READONLY");
-						Boolean varlen=(Boolean) dp.getValue("VARLEN");
-						Boolean varlenLE=(Boolean) dp.getValue("VARLENLE");
-						if (varlen.booleanValue()) {
-							ro=new Boolean(true);
-							reclen=new Integer(32*1024);
-						}
-						System.out.println("apro a " + reclen + " ro=" + ro);
-						open(chooser.getSelectedFile(), reclen.intValue(), ro.booleanValue(), varlen.booleanValue(), varlenLE.booleanValue());
-					}
-					break;
-				}
-			}
-		} else {
+		FileDialog fc = new FileDialog(messages);
+		Optional<OpenFileCommand> result = fc.showAndWait();
+		if (result.isPresent()) {
+			OpenFileCommand r = result.get();
+			System.out.println("apro a " + r.reclen + " ro=" + r.readonly);
+			open(new File(r.filename), r.reclen, r.readonly, r.varlen, r.littleEndian);
 		}
-		*/
 		setMenuState();
 	}
 
@@ -473,18 +466,17 @@ public class Main extends Application {
 				Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
 				alert.setTitle(messages.getString("dialog.file.changed"));
 				alert.setContentText(messages.getString("msg.confirm.file.changed"));
-				ButtonType yes = new ButtonType(messages.getString("button.yes"), ButtonData.YES);
-				ButtonType no = new ButtonType(messages.getString("button.no"), ButtonData.NO);
-				ButtonType canc = new ButtonType(messages.getString("button.cancel"), ButtonData.CANCEL_CLOSE);
+				ButtonType yes = new ButtonType(messages.getString("buttons.yes"), ButtonData.YES);
+				ButtonType no = new ButtonType(messages.getString("buttons.no"), ButtonData.NO);
+				ButtonType canc = new ButtonType(messages.getString("buttons.cancel"), ButtonData.CANCEL_CLOSE);
 				alert.getButtonTypes().setAll(yes, no, canc);
-				
+
 				Optional<ButtonType> result = alert.showAndWait();
-				switch (result.get().getButtonData())
-				{
+				switch (result.get().getButtonData()) {
 				case YES:
 					fe.save();
 					break;
-					
+
 				case NO:
 					fe.revertChanges();
 					break;
@@ -501,13 +493,16 @@ public class Main extends Application {
 		setMenuState();
 		return true;
 	}
-	
+
 	public void open(File f, int reclen, boolean ro, boolean vl, boolean vlle) {
-		new OpenFileThread(f, reclen, ro, vl, vlle).start();
-		/*
-		 * try { fe.open(f,reclen, ro); fe.requestFocus(); } catch (Exception e) {
-		 * showException(e); }
-		 */
+		
+		try {
+			fe.open(f, reclen, ro, vl, vlle);
+			fe.requestFocus();
+			setMenuState();
+		} catch (Exception e) {
+			FXDialog.errorBox(e);
+		}
 	}
 
 	public void doToggleHexmode() {
@@ -571,7 +566,7 @@ public class Main extends Application {
 
 	public void doReplace() {
 		/// TODO: replace dialog
-		
+
 //		if (replaceDialog == null) {
 //			replaceDialog = new FindDialog(this, messages, true);
 //		}
@@ -641,7 +636,7 @@ public class Main extends Application {
 	}
 
 	public void actionPerformed(String cmd) {
-		//String cmd = evt.getActionCommand();
+		// String cmd = evt.getActionCommand();
 		if (cmd.equals(CMD_FILE_OPEN_FLAT)) {
 			doOpen(true);
 		} else if (cmd.equals(CMD_FILE_OPEN_VSAM)) {
@@ -700,31 +695,5 @@ public class Main extends Application {
 			doAbout();
 		}
 		fe.requestFocus();
-	}
-	
-	class OpenFileThread extends Thread {
-		File file;
-		int reclen;
-		boolean ro;
-		boolean varlen;
-		boolean varlenLE;
-
-		public OpenFileThread(File f, int r, boolean b, boolean vl, boolean vlle) {
-			file = f;
-			reclen = r;
-			ro = b;
-			varlen=vl;
-			varlenLE=vlle;
-		}
-
-		public void run() {
-			try {
-				fe.open(file, reclen, ro, varlen, varlenLE);
-				fe.requestFocus();
-				setMenuState();
-			} catch (Exception e) {
-				FXDialog.errorBox(e);
-			}
-		}
 	}
 }

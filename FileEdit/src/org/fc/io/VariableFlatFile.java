@@ -16,7 +16,7 @@ public class VariableFlatFile extends FlatFile {
 		super(f, reclen);
 		LEHeader=vlle;
 	}
-	public VariableFlatFile(FlatFileInfo fi) {
+	public VariableFlatFile(DataFileInfo fi) {
 		super(fi);
 	}
 

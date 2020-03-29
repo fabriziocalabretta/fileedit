@@ -22,10 +22,10 @@ public class FlatFile extends DataFile {
 	boolean located = false;
 
 	public FlatFile(File f, int reclen) {
-		this(new FlatFileInfo(f, reclen));
+		this(new DataFileInfo(f, DataFileInfo.TYPE_FLAT, reclen));
 	}
 
-	public FlatFile(FlatFileInfo fi) {
+	public FlatFile(DataFileInfo fi) {
 		fileInfo = fi;
 	}
 
@@ -177,7 +177,7 @@ public class FlatFile extends DataFile {
 	}
 
 	public File getFile() {
-		return ((FlatFileInfo) fileInfo).getFile();
+		return new File(fileInfo.getFilename());
 	}
 
 	public void save() throws IOException {

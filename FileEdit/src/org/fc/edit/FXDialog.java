@@ -48,7 +48,6 @@ public class FXDialog {
 		alert.showAndWait();
 	}
 	
-	
 	public static boolean confirmBox(Application a, String msg)
 	{
 		Alert alert = new Alert(AlertType.ERROR);
@@ -59,4 +58,5 @@ public class FXDialog {
 		Optional<ButtonType> result = alert.showAndWait();
 		return (result.get() == ButtonType.OK);
 	}
+	
 }

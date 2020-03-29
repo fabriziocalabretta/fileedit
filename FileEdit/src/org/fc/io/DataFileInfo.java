@@ -1,6 +1,8 @@
 package org.fc.io;
 
-public abstract class DataFileInfo {
+import java.io.File;
+
+public class DataFileInfo {
 	public final static int TYPE_KSDS = 0;
 	public final static int TYPE_ESDS = 1;
 	public final static int TYPE_RSDS = 2;
@@ -13,8 +15,21 @@ public abstract class DataFileInfo {
 	private int type;
 	private int minRecordLength;
 	private int maxRecordLength;
-	
+
+	private String filename = null;
+
 	KeyInfo keyInfo = null;
+
+	public DataFileInfo(File f, int type, int reclen) {
+		this(f.getAbsolutePath(), type, reclen);
+	}
+
+	public DataFileInfo(String f, int type, int reclen) {
+		setType(TYPE_FLAT);
+		setMinRecordLength(reclen);
+		setMaxRecordLength(reclen);
+		this.filename = f;
+	}
 
 	public int getType() {
 		return type;
@@ -50,5 +65,13 @@ public abstract class DataFileInfo {
 
 	public void setMaxRecordLength(int i) {
 		maxRecordLength = i;
+	}
+
+	public String getFilename() {
+		return filename;
+	}
+
+	public void setFilename(String s) {
+		filename = s;
 	}
 }

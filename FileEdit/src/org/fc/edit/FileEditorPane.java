@@ -2,6 +2,7 @@ package org.fc.edit;
 
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+//import java.awt.event.KeyEvent;
 import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
@@ -11,8 +12,9 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
-import javax.swing.JButton;
+import javax.swing.SwingUtilities;
 
+import org.fc.edit.swing.FileEdit;
 import org.fc.hdm.ByteArray;
 import org.fc.io.DataFile;
 import org.fc.io.FlatFile;
@@ -24,12 +26,12 @@ import org.fc.utils.Ascii2EbcdicConverter;
 import org.fc.utils.ByteConverter;
 import org.fc.utils.Ebcdic2AsciiConverter;
 import org.fc.utils.SimpleConverter;
-import org.fc.widgets.SmartDialog;
 
 import javafx.application.Application;
+import javafx.embed.swing.SwingNode;
+import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
@@ -37,6 +39,8 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 
@@ -102,25 +106,32 @@ public class FileEditorPane extends BorderPane {
 		inputConverter = converterAsis;
 		refreshStatusBar();
 	}
-	
-	private void initWidgets()
-	{
+
+	private void initWidgets() {
 		// this.setBorder(BorderFactory.createEtchedBorder());
 		model = new EditorModel(40, 20);
 		view = new EditorView(model, this);
-		
+		SwingNode swingNode = new SwingNode();
+		swingNode.setDisable(true);		// allows to keep focus always on the JavaFX side
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				swingNode.setContent(view);
+			}
+		});
+
 		BorderPane pview = new BorderPane();
-		pview.setCenter(view);
-		//pview.setBorder(BorderFactory.createLoweredBevelBorder());
+		pview.setCenter(swingNode);
+		// pview.setBorder(BorderFactory.createLoweredBevelBorder());
 		statusBar = new HBox();
 		// statusBar.setBorder(BorderFactory.createEtchedBorder());
 		lOffset = new Label("off 0");
 		// lOffset.setFont(new Font("monospaced", Font.PLAIN, 12));
-		//lOffset.setBorder(BorderFactory.createLoweredBevelBorder());
+		// lOffset.setBorder(BorderFactory.createLoweredBevelBorder());
 		lRo = new Label();
-		//lRo.setBorder(BorderFactory.createLoweredBevelBorder());
+		// lRo.setBorder(BorderFactory.createLoweredBevelBorder());
 		lInsert = new Label();
-		//lInsert.setBorder(BorderFactory.createLoweredBevelBorder());
+		// lInsert.setBorder(BorderFactory.createLoweredBevelBorder());
 
 		lMsg = new Label();
 
@@ -131,18 +142,20 @@ public class FileEditorPane extends BorderPane {
 
 		this.setCenter(pview);
 		this.setBottom(statusBar);
+
+		setEventHandlers();
+
 	}
-	
-	private void addListeners(Object o)
-	{
+
+	private void addListeners(Object o) {
 		// addKeyListener
 		logger.severe("IMPLEMENTAREEEE addKeyListener");
 //		this.addMouseListener(this);
 //		this.addMouseMotionListener(this);
 //		this.addMouseWheelListener(this);
-		
+
 	}
-	
+
 	public void open(File file, int reclen, boolean readOnly, boolean vl, boolean vlle) throws IOException {
 		if (vl) {
 			df = new VariableFlatFile(file, reclen, vlle);
@@ -155,7 +168,7 @@ public class FileEditorPane extends BorderPane {
 //		df.setProgressMonitor(progressMonitor);
 		logger.severe("implement progressmonitor");
 		open(readOnly);
-		//progressMonitor.close();
+		// progressMonitor.close();
 	}
 
 	void open(boolean readOnly) throws IOException {
@@ -560,7 +573,7 @@ public class FileEditorPane extends BorderPane {
 		}
 		lInsert.setText(insertMode ? "INS" : "OVR");
 	}
-	
+
 	void prepareFind(byte[] s, boolean ignoreCase, boolean onRange, int f, int t) {
 		findIgnoreCase = ignoreCase;
 		findOnRange = onRange;
@@ -664,8 +677,7 @@ public class FileEditorPane extends BorderPane {
 		/** ricerco all'interno della parte visibile */
 		for (int i = findFromIndex; (i >= 0 && i < model.size()); i += direction) {
 			/*
-			 * System.out.println("i="+i);
-			 * System.out.println("max="+model.size());
+			 * System.out.println("i="+i); System.out.println("max="+model.size());
 			 * System.out.println("dir="+direction);
 			 */
 			ba = (ByteArray) model.get(i);
@@ -767,8 +779,8 @@ public class FileEditorPane extends BorderPane {
 		switch (conversionMode) {
 		/*
 		 * case FileEditorPane.CONVERSION_ASC2EBC:
-		 * outputConverter=converterAscii2Ebcdic;
-		 * inputConverter=converterAscii2Ebcdic; break;
+		 * outputConverter=converterAscii2Ebcdic; inputConverter=converterAscii2Ebcdic;
+		 * break;
 		 */
 		case FileEditorPane.CONVERSION_EBCDIC:
 			outputConverter = converterEbcdic2Ascii;
@@ -782,11 +794,11 @@ public class FileEditorPane extends BorderPane {
 		repaint();
 	}
 
-	public void repaint()
-	{
-		logger.severe("implementare repaint");
+	public void repaint() {
+		logger.severe("FileEditorPane.repaint()");
+		// view.repaint();
 	}
-	
+
 	public int getConversionMode() {
 		return conversionMode;
 	}
@@ -849,8 +861,9 @@ public class FileEditorPane extends BorderPane {
 	public void pasteClipboardContents() {
 		try {
 			Clipboard clipboard = Clipboard.getSystemClipboard();
-			if (!clipboard.hasString()) return;
-			String s = (String)clipboard.getContent(DataFormat.PLAIN_TEXT);
+			if (!clipboard.hasString())
+				return;
+			String s = (String) clipboard.getContent(DataFormat.PLAIN_TEXT);
 			if (s != null) {
 				byte[] v = s.getBytes();
 				for (int i = 0; i < v.length; i++) {
@@ -880,36 +893,218 @@ public class FileEditorPane extends BorderPane {
 			}
 		}
 	}
-	
+
 	public int getReplaceMode() {
-		
+
 		Alert dialog = new Alert(AlertType.CONFIRMATION);
 		dialog.setTitle(messages.getString("dialog.replace.mode.title"));
 		dialog.setHeaderText(messages.getString("dialog.replace.mode.header"));
-		
+
 		ButtonType replace = new ButtonType(messages.getString("buttons.replace"));
 		ButtonType skip = new ButtonType(messages.getString("buttons.skip"));
 		ButtonType replaceAll = new ButtonType(messages.getString("buttons.replace.all"));
 		ButtonType cancel = new ButtonType(messages.getString("buttons.cancel"), ButtonData.CANCEL_CLOSE);
-		
+
 		dialog.getButtonTypes().setAll(replace, skip, replaceAll, cancel);
 		Optional<ButtonType> result = dialog.showAndWait();
-		
-		if (result.get() == replace){
-		    return MODE_REPLACE; 
+
+		if (result.get() == replace) {
+			return MODE_REPLACE;
 		} else if (result.get() == skip) {
 			return MODE_SKIP;
 		} else if (result.get() == replaceAll) {
-		    return MODE_REPLACE_ALL;
+			return MODE_REPLACE_ALL;
 		} else {
 			return MODE_CANCEL;
 		}
 	}
 
-	
-	
-	void beep()
-	{
+	private void beep() {
 		Toolkit.getDefaultToolkit().beep();
+	}
+
+	private void setEventHandlers() {
+		this.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				logger.info("pressed" +event);
+				switch (event.getCode()) {
+				case LEFT:
+					cursorLeft();
+					break;
+				case RIGHT:
+					cursorRight();
+					break;
+				case DOWN:
+					cursorDown();
+					break;
+				case UP:
+					cursorUp();
+					break;
+				case PAGE_UP:
+					pageUp();
+					break;
+				case PAGE_DOWN:
+					pageDown();
+					break;
+				case HOME:
+					cursorBeginOfLine();
+					break;
+				case END:
+					cursorEndOfLine();
+					break;
+				case ENTER:
+					cursorNextLine();
+					break;
+				case BACK_SPACE:
+					backSpace();
+					break;
+				case DELETE:
+					deleteChar();
+					break;
+				case INSERT:
+					toggleInsertMode();
+					break;
+				default:
+					return;
+				}
+				event.consume();
+			}
+		});
+		this.setOnKeyTyped(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent evt) {
+				logger.info("typed "+ evt);
+				if (df == null || df.isReadOnly()) {
+					return;
+				}
+				byte b;
+				
+				switch (evt.getCode()) {
+				case ENTER:
+				case BACK_SPACE:
+					logger.info("typed ENTER or BSPC");
+					return;
+				default:
+				}
+
+				char c = evt.getCharacter().charAt(0);
+				if (c == '\n' || c == '\r')
+				{
+					return;
+				}
+				// System.out.println("-->"+(int)c);
+				int ea = view.getEditArea();
+				if (ea == EditorView.AREA_CHAR) {
+					b = (byte) c;
+					b = inputConverter.convert(b);
+				} else {
+					if ((c < '0' || c > '9') && (c < 'a' || c > 'f') && (c < 'A' || c > 'f')) {
+						beep();
+						return;
+					}
+					int d = Character.digit(c, 16);
+					int o = (int) model.getByte(view.getCursorX() - 1, view.getCurrentIndex());
+					if (ea == EditorView.AREA_HEX1) {
+						b = (byte) ((d << 4) | (o & 0x0F));
+					} else {
+						b = (byte) (d | (o & 0xF0));
+					}
+				}
+				putByte(b);
+			}
+		});
+		
+		this.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent evt) {
+				//int m = evt.getModifiers();
+				logger.info("mouse click "+evt);
+				logger.info("click count "+evt.getClickCount());
+				if (evt.getClickCount() == 1) {
+					selection = null;
+					((Main) parent).setMenuState();
+					selecting = false;
+					
+					int x = ((int)evt.getX()) / view.getCharWidth();
+					int y = ((int)evt.getY()) / view.getCharHeight();
+					if (view.getShowRecordNumber()) {
+						x -= 9;
+					}
+					cursorAt(x, y + 1);
+				}
+			}
+		});
+		
+		this.setOnMouseReleased(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent evt) {
+				logger.info(getClass().getName()+"+mouse release "+evt);
+				if (selection == null)
+					return;
+				int w = ((int)(evt.getX()) / view.getCharWidth()) - (int) selection.getX() + 1;
+				int h = ((int)(evt.getY()) / view.getCharHeight()) - (int) selection.getY() + 1;
+				if (view.getShowRecordNumber()) {
+					w -= 9;
+				}
+				selection.setSize(w, 1);
+				if (selection.getWidth() > 0 && selection.getHeight() > 0) {
+					repaint();
+				} else {
+					selection = null;
+				}
+				((Main) parent).setMenuState();
+				selecting = false;
+			}
+		});
+		
+		this.setOnMouseDragged(new EventHandler<MouseEvent>() {
+			// TODO: fai funzionare la selezione
+			@Override
+			public void handle(MouseEvent evt) {
+				int nx = ((int)evt.getX()) / view.getCharWidth();
+				int ny = ((int)evt.getY()) / view.getCharHeight();
+				if (view.getShowRecordNumber()) {
+					nx -= 9;
+				}
+				if (view.isHexMode()) {
+					ny = ny / 3;
+				}
+				if (selection == null || selecting == false) {
+					// inizio la selezione
+					selection = new Rectangle();
+					selection.setSize(1, 1);
+					selection.setLocation(nx, ny);
+					selecting = true;
+				} else {
+					// if(selection==null) return;
+					int w = 1;
+					int h = 1;
+					if (nx != selection.getX()) {
+						if (nx > selection.getX()) {
+							w = (int) nx - (int) selection.getX() + 1;
+						} else {
+							w = (int) selection.getWidth() + (int) (selection.getX() - nx - 1);
+							selection.setLocation((int) nx + 1, (int) selection.getY());
+						}
+					}
+					if (ny != selection.getY()) {
+						if (ny > selection.getY()) {
+							h = ny - (int) selection.getY() + 1;
+						} else {
+							h = (int) selection.getHeight() + (int) (selection.getY() - ny - 1);
+							selection.setLocation((int) selection.getX(), (int) ny + 1);
+						}
+
+					}
+					// selection.setSize (w,h);
+					selection.setSize(w, 1);
+					if (selection.getWidth() > 0 && selection.getHeight() > 0) {
+						repaint();
+					}
+				}
+				((Main) parent).setMenuState();
+			}
+		});
 	}
 }
