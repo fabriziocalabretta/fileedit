@@ -1,4 +1,4 @@
-package org.fc.edit;
+package org.fc.edit.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -30,6 +30,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
+import org.fc.edit.FindDialog;
+import org.fc.edit.PackageInfo;
 import org.fc.widgets.DynaConstants;
 import org.fc.widgets.DynaDialog;
 import org.fc.widgets.DynaGridBagPanel;

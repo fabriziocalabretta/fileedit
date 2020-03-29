@@ -94,7 +94,7 @@ public class EditorModel extends LinkedList {
 		}
 	}
 
-	void renum() {
+	public void renum() {
 		if (size() == 0)
 			return;
 		Record r = (Record) getFirst();
