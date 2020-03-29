@@ -2,6 +2,7 @@ package org.fc.edit;
 
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.event.MouseWheelEvent;
 //import java.awt.event.KeyEvent;
 import java.io.EOFException;
 import java.io.File;
@@ -14,7 +15,6 @@ import java.util.logging.Logger;
 
 import javax.swing.SwingUtilities;
 
-import org.fc.edit.swing.FileEdit;
 import org.fc.hdm.ByteArray;
 import org.fc.io.DataFile;
 import org.fc.io.FlatFile;
@@ -41,6 +41,7 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 
@@ -795,8 +796,7 @@ public class FileEditorPane extends BorderPane {
 	}
 
 	public void repaint() {
-		logger.severe("FileEditorPane.repaint()");
-		// view.repaint();
+		if (view != null) view.repaint();
 	}
 
 	public int getConversionMode() {
@@ -1015,13 +1015,14 @@ public class FileEditorPane extends BorderPane {
 			}
 		});
 		
-		this.setOnMouseClicked(new EventHandler<MouseEvent>() {
+		this.setOnMousePressed(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent evt) {
 				//int m = evt.getModifiers();
 				logger.info("mouse click "+evt);
 				logger.info("click count "+evt.getClickCount());
-				if (evt.getClickCount() == 1) {
+				logger.info("still "+evt.isStillSincePress());
+				if (evt.getClickCount() == 1 && evt.isStillSincePress()) {
 					selection = null;
 					((Main) parent).setMenuState();
 					selecting = false;
@@ -1062,6 +1063,7 @@ public class FileEditorPane extends BorderPane {
 			// TODO: fai funzionare la selezione
 			@Override
 			public void handle(MouseEvent evt) {
+				logger.info(getClass().getName()+"+mouse drag "+evt);
 				int nx = ((int)evt.getX()) / view.getCharWidth();
 				int ny = ((int)evt.getY()) / view.getCharHeight();
 				if (view.getShowRecordNumber()) {
@@ -1104,6 +1106,35 @@ public class FileEditorPane extends BorderPane {
 					}
 				}
 				((Main) parent).setMenuState();
+			}
+		});
+		
+		this.setOnScroll(new EventHandler<ScrollEvent>() {
+			// TODO: fai funzionare la selezione
+			@Override
+			public void handle(ScrollEvent evt) {
+				logger.info(getClass().getName()+"+scroll "+evt);
+				if (df != null && df.isOpened()) {
+					int l=0;
+					switch(evt.getTextDeltaYUnits()) {
+			        case LINES:
+			        	l=(int)evt.getTextDeltaY(); 
+			            break;
+			        case PAGES:
+			            // scroll about event.getTextDeltaY() pages
+			        	//logger.info("pages");
+			            break;
+			        case NONE:
+			            // scroll about event.getDeltaY() pixels
+			        	//logger.info("non");
+			            break;
+					}
+					if (l!=0)
+					{
+						logger.info("scroll "+l);
+						scroll(Math.abs(l), l>0);
+					}
+			    }
 			}
 		});
 	}
