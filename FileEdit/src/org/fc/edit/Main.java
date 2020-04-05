@@ -6,6 +6,10 @@ package org.fc.edit;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -14,8 +18,6 @@ import java.util.logging.Logger;
 import org.fc.edit.swing.FileEdit;
 
 import javafx.application.Application;
-import javafx.concurrent.Task;
-import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -27,22 +29,23 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioMenuItem;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Separator;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.ToolBar;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 public class Main extends Application {
 	public final static String CMD_FILE_OPEN_FLAT = "file.open.flat";
@@ -134,6 +137,8 @@ public class Main extends Application {
 	FileEditorPane fe = null;
 	Stage primaryStage;
 
+	
+
 	@Override
 	public void start(Stage stage) throws Exception {
 		// StackPane root = new StackPane();
@@ -155,8 +160,6 @@ public class Main extends Application {
 		stage.setTitle("FileEdit " + PackageInfo.getVersion());
 		stage.setScene(scene);
 
-		
-		
 		stage.show();
 
 		if (ofc != null) {
@@ -291,6 +294,7 @@ public class Main extends Application {
 
 		logger.severe("MANCA IL PANNELLO FILEPANE");
 		fe = new FileEditorPane(this, messages);
+
 		BorderPane bp = new BorderPane();
 		bp.setTop(new VBox(menuBar, toolBar));
 		bp.setCenter(fe);
@@ -495,7 +499,7 @@ public class Main extends Application {
 	}
 
 	public void open(File f, int reclen, boolean ro, boolean vl, boolean vlle) {
-		
+
 		try {
 			fe.open(f, reclen, ro, vl, vlle);
 			fe.requestFocus();
