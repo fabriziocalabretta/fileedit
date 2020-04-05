@@ -292,7 +292,6 @@ public class Main extends Application {
 		miHelpAbout = addMenuItem(mHelp, CMD_HELP_ABOUT);
 		menuBar.getMenus().add(mHelp);
 
-		logger.severe("MANCA IL PANNELLO FILEPANE");
 		fe = new FileEditorPane(this, messages);
 
 		BorderPane bp = new BorderPane();

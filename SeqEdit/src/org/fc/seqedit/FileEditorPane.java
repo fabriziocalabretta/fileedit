@@ -99,7 +99,6 @@ public class FileEditorPane extends BorderPane {
 		parent = p;
 		insertMode = false;
 		initWidgets();
-		addListeners(this);
 		converterAscii2Ebcdic = new Ascii2EbcdicConverter();
 		converterEbcdic2Ascii = new Ebcdic2AsciiConverter();
 		converterAsis = new SimpleConverter();
@@ -148,14 +147,6 @@ public class FileEditorPane extends BorderPane {
 
 	}
 
-	private void addListeners(Object o) {
-		// addKeyListener
-		logger.severe("IMPLEMENTAREEEE addKeyListener");
-//		this.addMouseListener(this);
-//		this.addMouseMotionListener(this);
-//		this.addMouseWheelListener(this);
-
-	}
 
 	public void open(File file, int reclen, boolean readOnly, boolean vl, boolean vlle) throws IOException {
 		if (vl) {
@@ -163,11 +154,11 @@ public class FileEditorPane extends BorderPane {
 		} else {
 			df = new FlatFile(file, reclen);
 		}
+		// TODO progress monitor
 //		ProgressMonitor progressMonitor = new ProgressMonitor(parent, messages.getString("progress.open") + " " + file + " ...", "", 0, 100);
 //		progressMonitor.setProgress(0);
 //		progressMonitor.setMillisToDecideToPopup(2000);
 //		df.setProgressMonitor(progressMonitor);
-		logger.severe("implement progressmonitor");
 		open(readOnly);
 		// progressMonitor.close();
 	}
