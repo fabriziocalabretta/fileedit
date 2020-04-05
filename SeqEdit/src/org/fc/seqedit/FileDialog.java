@@ -97,6 +97,10 @@ public class FileDialog extends Dialog<OpenFileCommand> {
 		content.setCenter(browser);
 		content.setRight(info);
 		
+		
+		//String stylesheet = getClass().getResource("DialogPaneDark.css").toExternalForm();
+		//this.getDialogPane().getStylesheets().add(stylesheet);
+
 		Platform.runLater(() -> tfFilename.requestFocus());
 		this.getDialogPane().setContent(content);
 		bttOk = new ButtonType(messages.getString("buttons.ok"), ButtonBar.ButtonData.OK_DONE);

@@ -1,5 +1,5 @@
 package org.fc.seqedit;
-// TODO https://github.com/huguesjohnson/debigulator/blob/master/fx/src/com/huguesjohnson/debigulatorfx/DebigulatorFXMLController.java
+
 import java.io.File;
 import java.io.FileFilter;
 
@@ -12,7 +12,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public class FileTreeItem extends TreeItem<String> {
-	// TODO immagini x file tree decenti
 	public static Image folderCollapseImage = new Image(
 			FileTreeItem.class.getResourceAsStream("graphics/folder.closed.png"));
 	public static Image folderExpandImage = new Image(
@@ -48,7 +47,10 @@ public class FileTreeItem extends TreeItem<String> {
 		this.isDirectory = file.isDirectory();
 		this.fileFilter=f;
 		if (this.isDirectory) {
-			this.setGraphic(new ImageView(folderCollapseImage));
+			ImageView iv=new ImageView(folderCollapseImage);
+			iv.setFitWidth(16);
+			iv.setFitHeight(16);
+			this.setGraphic(iv);
 			// add event handlers
 			this.addEventHandler(TreeItem.branchCollapsedEvent(), new EventHandler() {
 				@Override
@@ -57,6 +59,8 @@ public class FileTreeItem extends TreeItem<String> {
 					if (!source.isExpanded()) {
 						ImageView iv = (ImageView) source.getGraphic();
 						iv.setImage(folderCollapseImage);
+						iv.setFitWidth(16);
+						iv.setFitHeight(16);
 					}
 				}
 			});
@@ -67,11 +71,16 @@ public class FileTreeItem extends TreeItem<String> {
 					if (source.isExpanded()) {
 						ImageView iv = (ImageView) source.getGraphic();
 						iv.setImage(folderExpandImage);
+						iv.setFitWidth(16);
+						iv.setFitHeight(16);
 					}
 				}
 			});
 		} else {
-			this.setGraphic(new ImageView(fileImage));
+			ImageView iv=new ImageView(fileImage);
+			iv.setFitWidth(8);
+			iv.setFitHeight(8);
+			this.setGraphic(iv);
 		}
 		// set the value (which is what is displayed in the tree)
 		String fullPath = file.getAbsolutePath();

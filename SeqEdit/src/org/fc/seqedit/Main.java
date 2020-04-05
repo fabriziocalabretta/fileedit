@@ -154,6 +154,8 @@ public class Main extends Application {
 		primaryStage = stage;
 		Pane root = initWidgets();
 		Scene scene = new Scene(root, 800, 600);
+//		String stylesheet = getClass().getResource("bootstrap3.css").toExternalForm();
+//		scene.getStylesheets().add(stylesheet);
 		setMenuState();
 		stage.setTitle("FileEdit " + PackageInfo.getVersion());
 		stage.setScene(scene);
@@ -588,21 +590,16 @@ public class Main extends Application {
 	}
 
 	public void doDeleteMultiple() {
-		/// TODO: delete multiple
-//		DynaDialog d = new DynaDialog(this, true, "Delete multiple");
-//		d.addField("FROM", messages.getString("labels.delete.multiple.from"), DynaConstants.INTEGER, null, true);
-//		d.addField("TO", messages.getString("labels.delete.multiple.to"), DynaConstants.INTEGER, null, true);
-//		d.pack();
-//		d.setVisible(true);
-//		if (d.isOk()) {
-//			Integer f = (Integer) d.getValue("FROM");
-//			Integer t = (Integer) d.getValue("TO");
-//			if (t.longValue() < f.longValue()) {
-//				SmartDialog.messageBox(this, messages.getString("msg.wrong.range"));
-//			} else {
-//				fe.deleteMultiple(f.intValue(), t.longValue());
-//			}
-//		}
+		DeleteMultipleDialog fc = new DeleteMultipleDialog(messages);
+		Optional<DeleteMultipleCommand> result = fc.showAndWait();
+		if (result.isPresent()) {
+			DeleteMultipleCommand r = result.get();
+			if (r.getTo() < r.getFrom()) {
+				FXDialog.errorBox(messages.getString("msg.wrong.range"));
+			} else {
+				fe.deleteMultiple(r.getFrom(), r.getTo());
+			}
+		}
 	}
 
 	public void doHelp() {
