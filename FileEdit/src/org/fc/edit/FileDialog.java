@@ -96,7 +96,6 @@ public class FileDialog extends Dialog<OpenFileCommand> {
 		content.setTop(hbFn);
 		content.setCenter(browser);
 		content.setRight(info);
-		content.setPadding(new Insets(5, 5, 5, 5));
 		
 		Platform.runLater(() -> tfFilename.requestFocus());
 		this.getDialogPane().setContent(content);
