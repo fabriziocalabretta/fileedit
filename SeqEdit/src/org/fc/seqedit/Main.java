@@ -15,8 +15,6 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
-import org.fc.edit.swing.FileEdit;
-
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -202,7 +200,7 @@ public class Main extends Application {
 				}
 			}
 			if (file == null) {
-				FileEdit.wrongParms("missing file name");
+				Main.wrongParms("missing file name");
 			}
 			return new OpenFileCommand(file, len, ro, false, false);
 		}
@@ -553,36 +551,21 @@ public class Main extends Application {
 	}
 
 	public void doFind() {
-		// TODO: find dialog
-//		if (findDialog == null) {
-//			findDialog = new FindDialog(this, messages, false);
-//		}
-//		findDialog.setVisible(true);
-//
-//		if (findDialog.isOk()) {
-//			System.out.println("INIZIO IL FIND");
-//			byte[] s = findDialog.getFindWhat();
-//			fe.find(s, findDialog.isIgnoreCase(), (findDialog.getDirection() > 0), findDialog.isOnRange(), findDialog
-//					.getRangeFrom(), findDialog.getRangeTo());
-//		}
+		FindReplaceDialog fc = new FindReplaceDialog(messages, false);
+		Optional<FindReplaceCommand> result = fc.showAndWait();
+		if (result.isPresent()) {
+			FindReplaceCommand r = result.get();
+			fe.find(r.getWhat(), r.isIgnoreCase(), r.isForward(), r.isOnRange(), r.getRangeFrom(), r.getRangeTo());
+		}
 	}
 
 	public void doReplace() {
-		/// TODO: replace dialog
-
-//		if (replaceDialog == null) {
-//			replaceDialog = new FindDialog(this, messages, true);
-//		}
-//		replaceDialog.setVisible(true);
-//
-//		if (replaceDialog.isOk()) {
-//			System.out.println("INIZIO REPLACE");
-//			byte[] s = replaceDialog.getFindWhat();
-//			byte[] r = replaceDialog.getReplaceWith();
-//
-//			fe.replace(s, r, replaceDialog.isIgnoreCase(), (replaceDialog.getDirection() > 0), replaceDialog.isOnRange(),
-//					replaceDialog.getRangeFrom(), replaceDialog.getRangeTo());
-//		}
+		FindReplaceDialog fc = new FindReplaceDialog(messages, true);
+		Optional<FindReplaceCommand> result = fc.showAndWait();
+		if (result.isPresent()) {
+			FindReplaceCommand r = result.get();
+			fe.replace(r.getWhat(), r.getWith(), r.isIgnoreCase(), r.isForward(), r.isOnRange(), r.getRangeFrom(), r.getRangeTo());
+		}
 	}
 
 	public void doFindPrevious() {

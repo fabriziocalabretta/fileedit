@@ -50,7 +50,7 @@ public class FXDialog {
 	
 	public static boolean confirmBox(Application a, String msg)
 	{
-		Alert alert = new Alert(AlertType.ERROR);
+		Alert alert = new Alert(AlertType.CONFIRMATION);
 		alert.setTitle("Question");
 		//alert.setHeaderText(e.getMessage());
 		alert.setContentText(msg);

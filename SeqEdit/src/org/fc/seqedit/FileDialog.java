@@ -134,11 +134,9 @@ public class FileDialog extends Dialog<OpenFileCommand> {
 		});
 		UnaryOperator<Change> filter = change -> {
 		    String text = change.getText();
-
 		    if (text.matches("[0-9]*")) {
 		        return change;
 		    }
-
 		    return null;
 		};
 		tfReclen.setTextFormatter(new TextFormatter<>(filter));

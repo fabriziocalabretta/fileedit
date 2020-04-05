@@ -1,6 +1,6 @@
 package org.fc.seqedit;
 
-public class OpenFileCommand {
+public class OpenFileCommand implements IEditorCommand {
 	public String filename;
 	public int reclen;
 	public boolean readonly;

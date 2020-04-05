@@ -25,7 +25,8 @@ import org.fc.widgets.DynaConstants;
 import org.fc.widgets.DynaGridBagPanel;
 import org.fc.widgets.SmartDialog;
 
-public class FindDialog extends JDialog implements ActionListener {
+public class SwingFindDialog extends JDialog implements ActionListener {
+	// TODO da eliminare
 	boolean ok;
 	JFrame parent;
 	ResourceBundle messages;
@@ -44,7 +45,7 @@ public class FindDialog extends JDialog implements ActionListener {
 	int rangeTo = 0;
 	boolean replaceMode;
 
-	public FindDialog(JFrame p, ResourceBundle m, boolean rep) {
+	public SwingFindDialog(JFrame p, ResourceBundle m, boolean rep) {
 		super(p, true);
 		replaceMode = rep;
 		parent = p;
