@@ -30,8 +30,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
-import org.fc.edit.FindDialog;
-import org.fc.edit.PackageInfo;
+import org.fc.seqedit.FindDialog;
+import org.fc.seqedit.PackageInfo;
 import org.fc.widgets.DynaConstants;
 import org.fc.widgets.DynaDialog;
 import org.fc.widgets.DynaGridBagPanel;
@@ -463,7 +463,7 @@ public class FileEdit extends JFrame implements ActionListener {
 	public void doAbout() {
 		DynaDialog dd = new DynaDialog(this, true, messages.getString("caption.about"));
 		dd.addLabel("File Edit");
-		dd.addLabel("Version " + org.fc.edit.PackageInfo.getVersion());
+		dd.addLabel("Version " + org.fc.seqedit.PackageInfo.getVersion());
 		dd.setVisible(true);
 	}
 

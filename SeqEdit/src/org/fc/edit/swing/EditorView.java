@@ -10,11 +10,11 @@ import java.text.DecimalFormat;
 
 import javax.swing.JPanel;
 
-import org.fc.edit.EditorModel;
-import org.fc.edit.EditorModelListener;
 import org.fc.io.IsamKeyPart;
 import org.fc.io.KeyInfo;
 import org.fc.io.Record;
+import org.fc.seqedit.EditorModel;
+import org.fc.seqedit.EditorModelListener;
 import org.fc.utils.ByteConverter;
 
 public class EditorView extends JPanel implements EditorModelListener {

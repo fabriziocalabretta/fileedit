@@ -1,4 +1,4 @@
-package org.fc.edit;
+package org.fc.seqedit;
 
 import java.awt.Color;
 import java.awt.Dimension;

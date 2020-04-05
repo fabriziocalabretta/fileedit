@@ -36,7 +36,6 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.ProgressMonitor;
 
-import org.fc.edit.EditorModel;
 import org.fc.hdm.ByteArray;
 import org.fc.io.DataFile;
 import org.fc.io.FlatFile;
@@ -44,6 +43,7 @@ import org.fc.io.FlatRecord;
 import org.fc.io.Record;
 import org.fc.io.RrdsKey;
 import org.fc.io.VariableFlatFile;
+import org.fc.seqedit.EditorModel;
 import org.fc.utils.Ascii2EbcdicConverter;
 import org.fc.utils.ByteConverter;
 import org.fc.utils.Ebcdic2AsciiConverter;

@@ -2,7 +2,7 @@
  * http://tutorials.jenkov.com/javafx/index.html
  */
 
-package org.fc.edit;
+package org.fc.seqedit;
 
 import java.io.File;
 import java.io.IOException;
@@ -151,7 +151,7 @@ public class Main extends Application {
 			ofc = handleCommandLine(l.toArray(new String[0]));
 		}
 
-		messages = ResourceBundle.getBundle("org.fc.edit.messages");
+		messages = ResourceBundle.getBundle("org.fc.seqedit.messages");
 
 		primaryStage = stage;
 		Pane root = initWidgets();
@@ -630,8 +630,8 @@ public class Main extends Application {
 	public void doAbout() {
 		Alert alert = new Alert(AlertType.INFORMATION);
 		alert.setTitle(messages.getString("caption.about"));
-		alert.setHeaderText(org.fc.edit.PackageInfo.getName());
-		alert.setContentText("Version " + org.fc.edit.PackageInfo.getVersion());
+		alert.setHeaderText(org.fc.seqedit.PackageInfo.getName());
+		alert.setContentText("Version " + org.fc.seqedit.PackageInfo.getVersion());
 		alert.showAndWait();
 	}
 

@@ -1,4 +1,4 @@
-package org.fc.edit;
+package org.fc.seqedit;
 // TODO https://github.com/huguesjohnson/debigulator/blob/master/fx/src/com/huguesjohnson/debigulatorfx/DebigulatorFXMLController.java
 import java.io.File;
 import java.io.FileFilter;
@@ -12,6 +12,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public class FileTreeItem extends TreeItem<String> {
+	// TODO immagini x file tree decenti
 	public static Image folderCollapseImage = new Image(
 			FileTreeItem.class.getResourceAsStream("graphics/folder.closed.png"));
 	public static Image folderExpandImage = new Image(

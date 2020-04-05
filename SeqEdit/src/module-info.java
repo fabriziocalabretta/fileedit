@@ -7,8 +7,8 @@ module filedit {
 	requires javafx.base;
 	requires javafx.swing;
 	
-	opens org.fc.edit to javafx.fxml;
-	exports org.fc.edit;
+	opens org.fc.seqedit to javafx.fxml;
+	exports org.fc.seqedit;
 	exports org.fc.io;
 	exports org.fc.hdm;
 }

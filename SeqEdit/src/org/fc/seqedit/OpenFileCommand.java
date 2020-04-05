@@ -1,4 +1,4 @@
-package org.fc.edit;
+package org.fc.seqedit;
 
 public class OpenFileCommand {
 	public String filename;

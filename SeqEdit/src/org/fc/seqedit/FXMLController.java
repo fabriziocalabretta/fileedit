@@ -1,4 +1,4 @@
-package org.fc.edit;
+package org.fc.seqedit;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
