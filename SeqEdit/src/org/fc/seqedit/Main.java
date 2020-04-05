@@ -6,16 +6,14 @@ package org.fc.seqedit;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -27,14 +25,11 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioMenuItem;
-import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Separator;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.ToolBar;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -44,6 +39,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 public class Main extends Application {
 	public final static String CMD_FILE_OPEN_FLAT = "file.open.flat";
@@ -135,8 +131,6 @@ public class Main extends Application {
 	FileEditorPane fe = null;
 	Stage primaryStage;
 
-	
-
 	@Override
 	public void start(Stage stage) throws Exception {
 		// StackPane root = new StackPane();
@@ -157,9 +151,21 @@ public class Main extends Application {
 //		String stylesheet = getClass().getResource("bootstrap3.css").toExternalForm();
 //		scene.getStylesheets().add(stylesheet);
 		setMenuState();
-		stage.setTitle("FileEdit " + PackageInfo.getVersion());
-		stage.setScene(scene);
-
+		primaryStage.setTitle("FileEdit " + PackageInfo.getVersion());
+		primaryStage.setScene(scene);
+		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+		    @Override
+		    public void handle(WindowEvent t) {
+		    	if (doClose()) {
+		    		Platform.exit();
+		    		System.exit(0);
+		    	}
+		    	else
+		    	{
+		    		t.consume();
+		    	}
+		    }
+		});
 		stage.show();
 
 		if (ofc != null) {
